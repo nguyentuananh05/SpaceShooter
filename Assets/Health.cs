@@ -1,26 +1,42 @@
 using UnityEngine;
+using System;
 
 public class Health : MonoBehaviour
 {
     public GameObject explosionPrefab;
-    public int defaultHealthPoint;
-    private int healthPoint;
-    public void OnTriggerEnter2D(Collider2D collision) => Die();
+    public int defaultHealthPoint = 3;
 
-    protected virtual void Die()
+    int currentHealth;
+
+    public Action onDead;
+
+    void Awake()
     {
-        var explosion = Instantiate(explosionPrefab, transform.position,
-        transform.rotation);
-        Destroy(explosion, 1);
-        Destroy(gameObject);
+        currentHealth = defaultHealthPoint;
     }
-    private void Start() => healthPoint = defaultHealthPoint;
 
     public void TakeDamage(int damage)
     {
-        if (healthPoint <= 0) return;
+        currentHealth -= damage;
 
-        healthPoint -= damage;
-        if (healthPoint <= 0) Die();
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
+    }
+
+    protected virtual void Die()
+    {
+        var explosion = Instantiate(
+            explosionPrefab,
+            transform.position,
+            transform.rotation
+        );
+
+        Destroy(explosion, 1);
+
+        Destroy(gameObject);
+
+        onDead?.Invoke();
     }
 }
