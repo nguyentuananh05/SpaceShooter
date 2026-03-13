@@ -3,23 +3,28 @@ using System;
 
 public class Health : MonoBehaviour
 {
-    public GameObject explosionPrefab;
     public int defaultHealthPoint = 3;
 
-    int currentHealth;
-
     public Action onDead;
+    public Action onHealthChanged;
 
-    void Awake()
+    public int healthPoint;
+
+    void Start()
     {
-        currentHealth = defaultHealthPoint;
+        healthPoint = defaultHealthPoint;
+        onHealthChanged?.Invoke();
     }
 
     public void TakeDamage(int damage)
     {
-        currentHealth -= damage;
+        if (healthPoint <= 0) return;
 
-        if (currentHealth <= 0)
+        healthPoint -= damage;
+
+        onHealthChanged?.Invoke();
+
+        if (healthPoint <= 0)
         {
             Die();
         }
@@ -27,16 +32,7 @@ public class Health : MonoBehaviour
 
     protected virtual void Die()
     {
-        var explosion = Instantiate(
-            explosionPrefab,
-            transform.position,
-            transform.rotation
-        );
-
-        Destroy(explosion, 1);
-
         Destroy(gameObject);
-
         onDead?.Invoke();
     }
 }
